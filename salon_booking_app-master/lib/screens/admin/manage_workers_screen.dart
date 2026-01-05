@@ -279,38 +279,6 @@ class _ManageWorkersScreenState extends State<ManageWorkersScreen> {
       ),
       body: Column(
         children: [
-          // Banner hướng dẫn (đẹp kiểu card)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
-            child: Card(
-              elevation: 0.5,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-                side: const BorderSide(color: Color(0x11000000)),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    CircleAvatar(
-                      backgroundColor: primary.withOpacity(0.12),
-                      child: const Icon(Icons.info_outline, color: primary),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        "BookingScreen đang dùng workerId mặc định:\n$kDefaultWorkerId\n"
-                            "Nếu bạn chưa có worker ID này, bấm nút 🔧 trên AppBar để tạo.",
-                        style: const TextStyle(height: 1.25),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-
           // Search
           Padding(
             padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),

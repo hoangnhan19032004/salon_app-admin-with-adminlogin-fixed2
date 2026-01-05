@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import 'package:salon_app/screens/promotions/promotions_screen.dart';
 import 'package:salon_app/provider/user_provider.dart';
 import 'package:salon_app/widgets/horizontal_line.dart';
 import 'package:salon_app/screens/profile/edit_profile_screen.dart'; // ✅ tạo file này
@@ -243,20 +244,16 @@ class ProfileScreen extends StatelessWidget {
                 },
               ),
               SectionCard(
-                header: "Mã khuyến mãi",
-                desc: "Xem voucher & ưu đãi dành cho bạn",
+                header: "Thông Báo",
+                desc: "Khuyến mãi & ưu đãi dành cho bạn",
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (_) => const _SimplePlaceholderPage(
-                        title: "Mã khuyến mãi",
-                        subtitle: "Chức năng này sẽ được cập nhật trong phiên bản tiếp theo.",
-                      ),
-                    ),
+                    MaterialPageRoute(builder: (_) => const PromotionsScreen()),
                   );
                 },
               ),
+
               SectionCard(
                 header: "Đánh giá của tôi",
                 desc: "Đánh giá dịch vụ & chuyên viên",
@@ -274,7 +271,7 @@ class ProfileScreen extends StatelessWidget {
               ),
               SectionCard(
                 header: "Cài đặt",
-                desc: "Thông báo, bảo mật, quyền riêng tư",
+                desc: " Chính sách bảo mật, quyền riêng tư",
                 onTap: () {
                   Navigator.push(
                     context,

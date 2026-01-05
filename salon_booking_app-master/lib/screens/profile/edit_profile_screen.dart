@@ -1,6 +1,10 @@
-import 'package:flutter/material.dart';
+import 'dart:typed_data';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/material.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -16,6 +20,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   DateTime? _dob;
   bool _loading = false;
+
+  // ✅ NEW: avatar state
+  String? _photoUrl;
+  bool _uploadingPhoto = false;
 
   User get _user => FirebaseAuth.instance.currentUser!;
 
@@ -73,6 +81,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       final doc = await FirebaseFirestore.instance.collection('users').doc(_user.uid).get();
       final data = doc.data();
 
+      // ✅ ưu tiên Firestore photoUrl, fallback qua FirebaseAuth.photoURL
+      _photoUrl = (data?['photoUrl'] ?? data?['avatarUrl'] ?? _user.photoURL)?.toString();
+
       if (data != null) {
         _phoneCtl.text = (data['phone'] ?? "").toString();
         final dob = data['dob'];
@@ -96,6 +107,66 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     if (picked != null) setState(() => _dob = picked);
   }
 
+  // ✅ NEW: chọn ảnh + upload Storage + lưu Firestore
+  Future<void> _pickAndUploadPhoto() async {
+    if (_uploadingPhoto || _loading) return;
+
+    try {
+      setState(() => _uploadingPhoto = true);
+
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.image,
+        withData: true, // lấy bytes để upload đa nền tảng
+      );
+
+      if (result == null || result.files.isEmpty) return;
+
+      final file = result.files.single;
+      final bytes = file.bytes;
+      if (bytes == null) {
+        _snack("Không đọc được dữ liệu ảnh. Hãy thử chọn ảnh khác.");
+        return;
+      }
+
+      // upload path: avatars/<uid>/avatar_<timestamp>.jpg
+      final ext = (file.extension ?? "jpg").toLowerCase();
+      final ref = FirebaseStorage.instance
+          .ref()
+          .child("avatars")
+          .child(_user.uid)
+          .child("avatar_${DateTime.now().millisecondsSinceEpoch}.$ext");
+
+      final meta = SettableMetadata(
+        contentType: ext == "png" ? "image/png" : "image/jpeg",
+      );
+
+      await ref.putData(bytes, meta);
+      final url = await ref.getDownloadURL();
+
+      // lưu Firestore
+      await FirebaseFirestore.instance.collection('users').doc(_user.uid).set(
+        {
+          "photoUrl": url,
+          "updatedAt": FieldValue.serverTimestamp(),
+        },
+        SetOptions(merge: true),
+      );
+
+      // cập nhật FirebaseAuth photoURL (tuỳ bạn có dùng hay không)
+      await _user.updatePhotoURL(url);
+      await _user.reload();
+
+      setState(() => _photoUrl = url);
+      _snack("Đã cập nhật ảnh đại diện");
+    } on FirebaseException catch (e) {
+      _snack("Upload ảnh thất bại (${e.code}). Kiểm tra Storage Rules.");
+    } catch (e) {
+      _snack("Upload ảnh thất bại: $e");
+    } finally {
+      if (mounted) setState(() => _uploadingPhoto = false);
+    }
+  }
+
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -115,6 +186,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           'fullName': name,
           'phone': phone,
           'dob': _dob == null ? null : Timestamp.fromDate(_dob!),
+          // ✅ NEW: lưu photoUrl (nếu đã có)
+          if (_photoUrl != null) 'photoUrl': _photoUrl,
           'updatedAt': FieldValue.serverTimestamp(),
         },
         SetOptions(merge: true),
@@ -123,7 +196,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       if (!mounted) return;
 
       _snack("Cập nhật hồ sơ thành công");
-      Navigator.pop(context, true); // trả về true để profile refresh
+      Navigator.pop(context, true);
     } catch (e) {
       _snack("Cập nhật thất bại: $e");
     } finally {
@@ -133,10 +206,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final canEdit = !_loading && !_uploadingPhoto;
+
     return Scaffold(
       body: Stack(
         children: [
-          // ✅ nền gradient đồng bộ dự án
+          // nền gradient
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -153,7 +228,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           SafeArea(
             child: Column(
               children: [
-                // ✅ AppBar custom (back + title)
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                   child: Row(
@@ -183,17 +257,67 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
                     child: Column(
                       children: [
-                        // ✅ Avatar “fake” (sau này bạn có thể thay bằng ảnh thật)
-                        Container(
-                          width: 92,
-                          height: 92,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.18),
-                            borderRadius: BorderRadius.circular(28),
-                            border: Border.all(color: Colors.white.withOpacity(0.35)),
+                        // ✅ Avatar thật + nút chọn ảnh
+                        GestureDetector(
+                          onTap: canEdit ? _pickAndUploadPhoto : null,
+                          child: Stack(
+                            alignment: Alignment.bottomRight,
+                            children: [
+                              Container(
+                                width: 92,
+                                height: 92,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.18),
+                                  borderRadius: BorderRadius.circular(28),
+                                  border: Border.all(color: Colors.white.withOpacity(0.35)),
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(28),
+                                  child: _photoUrl == null || _photoUrl!.isEmpty
+                                      ? const Icon(Icons.person, color: Colors.white, size: 44)
+                                      : Image.network(
+                                    _photoUrl!,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, __, ___) => const Icon(
+                                      Icons.person,
+                                      color: Colors.white,
+                                      size: 44,
+                                    ),
+                                    loadingBuilder: (context, child, progress) {
+                                      if (progress == null) return child;
+                                      return const Center(
+                                        child: SizedBox(
+                                          width: 22,
+                                          height: 22,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                margin: const EdgeInsets.all(6),
+                                padding: const EdgeInsets.all(6),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.92),
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                child: _uploadingPhoto
+                                    ? const SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                )
+                                    : const Icon(Icons.camera_alt_outlined, size: 18),
+                              ),
+                            ],
                           ),
-                          child: const Icon(Icons.person, color: Colors.white, size: 44),
                         ),
+
                         const SizedBox(height: 12),
                         Text(
                           _user.email ?? "",
@@ -201,7 +325,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         ),
                         const SizedBox(height: 16),
 
-                        // ✅ Card Form
                         Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
@@ -227,7 +350,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                 ),
                                 const SizedBox(height: 14),
 
-                                // Họ tên
                                 TextFormField(
                                   controller: _nameCtl,
                                   decoration: _inputStyle(
@@ -243,7 +365,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                 ),
                                 const SizedBox(height: 12),
 
-                                // Phone
                                 TextFormField(
                                   controller: _phoneCtl,
                                   keyboardType: TextInputType.phone,
@@ -253,7 +374,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                   ),
                                   validator: (v) {
                                     final s = (v ?? "").trim();
-                                    if (s.isEmpty) return null; // cho phép trống
+                                    if (s.isEmpty) return null;
                                     if (!RegExp(r'^0\d{9}$').hasMatch(s)) {
                                       return "SĐT phải 10 số và bắt đầu bằng 0";
                                     }
@@ -262,7 +383,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                 ),
                                 const SizedBox(height: 12),
 
-                                // DOB picker
                                 InkWell(
                                   onTap: _loading ? null : _pickDob,
                                   borderRadius: BorderRadius.circular(16),
@@ -279,7 +399,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                         const SizedBox(width: 10),
                                         Expanded(
                                           child: Text(
-                                            _dob == null ? "Chưa chọn ngày sinh" : "Ngày sinh: ${_fmtDate(_dob!)}",
+                                            _dob == null
+                                                ? "Chưa chọn ngày sinh"
+                                                : "Ngày sinh: ${_fmtDate(_dob!)}",
                                             style: const TextStyle(fontWeight: FontWeight.w600),
                                           ),
                                         ),

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'package:salon_app/screens/admin/manage_chats_screen.dart';
 // TODO: sửa đúng đường dẫn theo project của bạn
+import 'package:salon_app/screens/admin/manage_promotions_screen.dart';
 import 'package:salon_app/screens/admin/manage_services_screen.dart';
 import 'package:salon_app/screens/admin/manage_bookings_screen.dart';
 import 'package:salon_app/screens/admin/manage_workers_screen.dart';
@@ -216,25 +217,16 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
               color: primary,
               onTap: () => _go(context, const ManageChatsScreen()),
             ),
+            const SizedBox(height: 10),
 
-            const SizedBox(height: 18),
-
-            // ===== Tips/Notes =====
-            Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0x11000000)),
-              ),
-              child: const Text(
-                "Gợi ý:\n"
-                    "- Nếu bạn muốn admin truy cập bằng tài khoản user, hãy set users/{uid}.role = 'admin'.\n"
-                    "- Nếu chat không hiển thị, kiểm tra collection support_chats và subcollection messages.\n"
-                    "- Nếu lịch hẹn đang hardcode workerId, nên sửa để user chọn chuyên viên (mình có thể sửa luôn).",
-                style: TextStyle(color: Colors.black87, height: 1.35),
-              ),
+            _ActionTile(
+              title: "Quản lý ưu đãi",
+              subtitle: "Tạo thông báo khuyến mãi cho khách",
+              icon: Icons.campaign,
+              color: primary,
+              onTap: () => _go(context, const ManagePromotionsScreen()),
             ),
+            const SizedBox(height: 10),
 
             const SizedBox(height: 12),
 

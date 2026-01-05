@@ -19,6 +19,9 @@ class _ChatPageState extends State<ChatPage> {
   bool _sending = false;
   bool _botTyping = false;
 
+  // ✅ NEW: trạng thái đang xóa chat
+  bool _deleting = false;
+
   User? get _user => FirebaseAuth.instance.currentUser;
 
   // ✅ chỉ tạo chatId khi đã login
@@ -52,6 +55,65 @@ class _ChatPageState extends State<ChatPage> {
       duration: const Duration(milliseconds: 260),
       curve: Curves.easeOut,
     );
+  }
+
+  // ✅ NEW: Xóa toàn bộ đoạn chat (messages + room doc) bằng batch
+  Future<void> _deleteChat() async {
+    final user = _user;
+    if (user == null) {
+      _snack("Bạn cần đăng nhập để xóa chat.");
+      return;
+    }
+    if (_deleting) return;
+
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text("Xóa đoạn chat?"),
+        content: const Text(
+          "Toàn bộ lịch sử chat sẽ bị xóa vĩnh viễn.\nBạn có chắc chắn muốn xóa không?",
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text("Hủy"),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text("Xóa"),
+          ),
+        ],
+      ),
+    );
+
+    if (ok != true) return;
+
+    setState(() => _deleting = true);
+
+    try {
+      // 1) Xóa messages theo từng batch (<= 450 docs / commit)
+      while (true) {
+        final snap = await _msgCol.limit(450).get();
+        if (snap.docs.isEmpty) break;
+
+        final batch = FirebaseFirestore.instance.batch();
+        for (final d in snap.docs) {
+          batch.delete(d.reference);
+        }
+        await batch.commit();
+      }
+
+      // 2) Xóa room doc
+      await _chatDoc.delete();
+
+      _snack("Đã xóa đoạn chat.");
+    } on FirebaseException catch (e) {
+      _snack("Không thể xóa chat (${e.code}). Kiểm tra Firestore Rules.");
+    } catch (e) {
+      _snack("Không thể xóa chat: $e");
+    } finally {
+      if (mounted) setState(() => _deleting = false);
+    }
   }
 
   // ====== Salon-only bot ======
@@ -105,7 +167,10 @@ class _ChatPageState extends State<ChatPage> {
   String _botReplySalon(String text) {
     final t = text.toLowerCase();
 
-    if (t.contains("xin chào") || t.contains("chào") || t.contains("hi") || t.contains("hello")) {
+    if (t.contains("xin chào") ||
+        t.contains("chào") ||
+        t.contains("hi") ||
+        t.contains("hello")) {
       return """
 Xin chào 👋
 Mình là tư vấn salon tóc. Bạn muốn hỏi về:
@@ -205,7 +270,8 @@ Bạn hỏi giúp mình về vấn đề tóc để mình hỗ trợ tốt nhấ
       // giả lập thời gian tư vấn
       await Future.delayed(Duration(milliseconds: 450 + Random().nextInt(700)));
 
-      final reply = _isSalonTopic(userText) ? _botReplySalon(userText) : _botReplyOffTopic();
+      final reply =
+      _isSalonTopic(userText) ? _botReplySalon(userText) : _botReplyOffTopic();
 
       // add bot/staff message
       await _msgCol.add({
@@ -243,7 +309,7 @@ Bạn hỏi giúp mình về vấn đề tóc để mình hỗ trợ tốt nhấ
       _snack("Bạn cần đăng nhập để chat.");
       return;
     }
-    if (_sending) return;
+    if (_sending || _deleting) return;
 
     setState(() => _sending = true);
     _msgCtl.clear();
@@ -285,51 +351,6 @@ Bạn hỏi giúp mình về vấn đề tóc để mình hỗ trợ tốt nhấ
     }
   }
 
-  Future<void> _deleteChat() async {
-    final user = _user;
-    if (user == null) {
-      _snack("Bạn cần đăng nhập để thực hiện việc này.");
-      return;
-    }
-
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Xóa cuộc trò chuyện?"),
-        content: const Text("Toàn bộ lịch sử trò chuyện này sẽ bị xóa vĩnh viễn."),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text("Hủy"),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text("Xóa"),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed != true) return;
-
-    try {
-      // Delete all messages in the subcollection
-      final messages = await _msgCol.get();
-      for (final doc in messages.docs) {
-        await doc.reference.delete();
-      }
-
-      // Delete the chat document
-      await _chatDoc.delete();
-
-      _snack("Đã xóa cuộc trò chuyện.");
-    } on FirebaseException catch (e) {
-      _snack("Không thể xóa cuộc trò chuyện (${e.code}).");
-    } catch (e) {
-      _snack("Không thể xóa cuộc trò chuyện: $e");
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final user = _user;
@@ -339,11 +360,18 @@ Bạn hỏi giúp mình về vấn đề tóc để mình hỗ trợ tốt nhấ
       appBar: AppBar(
         title: const Text("Thái Nhân Salon chat bot"),
         actions: [
+          // ✅ NEW: nút xóa đoạn chat
           if (isLoggedIn)
             IconButton(
-              icon: const Icon(Icons.delete_outline),
-              tooltip: "Xóa cuộc trò chuyện",
-              onPressed: _deleteChat,
+              tooltip: "Xóa đoạn chat",
+              onPressed: _deleting ? null : _deleteChat,
+              icon: _deleting
+                  ? const SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+                  : const Icon(Icons.delete_outline),
             ),
         ],
       ),
@@ -488,7 +516,7 @@ Bạn hỏi giúp mình về vấn đề tóc để mình hỗ trợ tốt nhấ
                   child: TextField(
                     focusNode: _focusNode,
                     controller: _msgCtl,
-                    enabled: isLoggedIn && !_sending,
+                    enabled: isLoggedIn && !_sending && !_deleting,
                     textInputAction: TextInputAction.send,
                     onSubmitted: (_) => _send(),
                     decoration: InputDecoration(
@@ -504,7 +532,7 @@ Bạn hỏi giúp mình về vấn đề tóc để mình hỗ trợ tốt nhấ
                 const SizedBox(width: 8),
                 IconButton(
                   tooltip: "Gửi",
-                  onPressed: (isLoggedIn && !_sending) ? _send : null,
+                  onPressed: (isLoggedIn && !_sending && !_deleting) ? _send : null,
                   icon: _sending
                       ? const SizedBox(
                     width: 18,
