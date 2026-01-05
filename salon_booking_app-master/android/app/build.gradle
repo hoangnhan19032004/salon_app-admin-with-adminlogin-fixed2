@@ -1,0 +1,49 @@
+plugins {
+    id "com.android.application"
+    id "org.jetbrains.kotlin.android"
+    id "dev.flutter.flutter-gradle-plugin"
+    id "com.google.gms.google-services"
+
+}
+
+android {
+    namespace "com.example.salon_app"
+
+    compileSdk flutter.compileSdkVersion
+    ndkVersion flutter.ndkVersion
+
+    // ✅ FIX cloud_firestore: cần bật BuildConfig generation
+    buildFeatures {
+        buildConfig true
+    }
+
+    defaultConfig {
+        applicationId "com.example.salon_app"
+
+        // ✅ FIX NDK: bắt buộc >= 21 (không dùng flutter.minSdkVersion)
+        minSdkVersion flutter.minSdkVersion
+
+        targetSdk flutter.targetSdkVersion
+        versionCode flutter.versionCode
+        versionName flutter.versionName
+    }
+
+    buildTypes {
+        release {
+            signingConfig signingConfigs.debug
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+}
+
+flutter {
+    source "../.."
+}
