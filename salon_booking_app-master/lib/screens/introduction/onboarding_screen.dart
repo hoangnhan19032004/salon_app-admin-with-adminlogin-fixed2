@@ -40,9 +40,9 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
   }
 
   final List<String> imgUrl = [
-    "https://thumbs.dreamstime.com/b/hairdresser-protective-mask-cutting-hair-curly-african-american-client-beauty-salon-free-space-195792989.jpg",
-    "https://as2.ftcdn.net/v2/jpg/02/65/48/75/1000_F_265487582_hg1t4uvUI33fhRDTdxVyHTNjv0F5WdX4.jpg",
-    "https://www.nextinsurance.com/wp-content/uploads/2018/05/shutterstock_256912663-802x454.jpg",
+    "https://sf-static.upanhlaylink.com/img/image_20260106df4076262591f1430d0ce4be7275ccc0.jpg",
+    "https://sf-static.upanhlaylink.com/img/image_20260106d0cff3c2428142c785b6fda07bfb7a28.jpg",
+    "https://sf-static.upanhlaylink.com/img/image_202601065ede7b79455326e47a1752420cb97639.jpg",
   ];
 
   @override

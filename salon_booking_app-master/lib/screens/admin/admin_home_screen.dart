@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import 'package:salon_app/screens/admin/manage_chats_screen.dart';
-// TODO: sửa đúng đường dẫn theo project của bạn
 import 'package:salon_app/screens/admin/manage_promotions_screen.dart';
 import 'package:salon_app/screens/admin/manage_services_screen.dart';
 import 'package:salon_app/screens/admin/manage_bookings_screen.dart';
@@ -19,224 +18,298 @@ class AdminHomeScreen extends StatefulWidget {
 }
 
 class _AdminHomeScreenState extends State<AdminHomeScreen> {
-  // Nếu Firestore rules của bạn chặn count bằng aggregation,
-  // dùng cách stream "limit(1)" để hiển thị "có dữ liệu" thay vì count chính xác.
-  // Nhưng ở đây ta lấy count bằng snapshot.size (đủ nhanh với data vừa).
+  static const Color _primary = Color(0xff721c80);
+  static const Color _primary2 = Color.fromARGB(255, 196, 103, 169);
+
   Stream<int> _watchCount(String col) {
     return FirebaseFirestore.instance.collection(col).snapshots().map((s) => s.size);
   }
 
-  // Nút điều hướng tiện
   void _go(BuildContext context, Widget page) {
     Navigator.push(context, MaterialPageRoute(builder: (_) => page));
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    const primary = Color(0xff721c80);
+    final w = MediaQuery.of(context).size.width;
+    final isSmall = w < 420;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF6F7FB),
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: primary,
-        foregroundColor: Colors.white,
-        title: const Text("Admin Dashboard"),
-        actions: [
-          IconButton(
-            tooltip: "Làm mới",
-            onPressed: () => setState(() {}),
-            icon: const Icon(Icons.refresh),
-          ),
-          IconButton(
-            tooltip: "Đăng xuất",
-            onPressed: () => widget.onLogout?.call(),
-            icon: const Icon(Icons.logout),
-          ),
-        ],
-      ),
       body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-          children: [
-            // ===== Header card =====
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(18),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color(0x14000000),
-                    blurRadius: 14,
-                    offset: Offset(0, 6),
-                  ),
-                ],
+        child: CustomScrollView(
+          slivers: [
+            // ===== Modern AppBar (Sliver) =====
+            SliverAppBar(
+              pinned: true,
+              elevation: 0,
+              backgroundColor: Colors.white,
+              surfaceTintColor: Colors.white,
+              title: const Text(
+                "Admin Dashboard",
+                style: TextStyle(fontWeight: FontWeight.w900),
               ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: primary.withOpacity(0.12),
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: const Icon(Icons.admin_panel_settings, color: primary),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        Text(
-                          "Quản trị hệ thống",
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+              actions: [
+                IconButton(
+                  tooltip: "Làm mới",
+                  onPressed: () => setState(() {}),
+                  icon: const Icon(Icons.refresh_rounded),
+                ),
+                IconButton(
+                  tooltip: "Đăng xuất",
+                  onPressed: () => widget.onLogout?.call(),
+                  icon: const Icon(Icons.logout_rounded),
+                ),
+                const SizedBox(width: 6),
+              ],
+              bottom: PreferredSize(
+                preferredSize: const Size.fromHeight(1),
+                child: Container(height: 1, color: const Color(0x11000000)),
+              ),
+            ),
+
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 18),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // ===== Hero Header Card =====
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [_primary, _primary2],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
                         ),
-                        SizedBox(height: 4),
-                        Text(
-                          "Theo dõi số liệu & quản lý dữ liệu: dịch vụ, lịch hẹn, chuyên viên, người dùng, chat.",
-                          style: TextStyle(color: Colors.black54, height: 1.25),
+                        borderRadius: BorderRadius.circular(22),
+                        boxShadow: [
+                          BoxShadow(
+                            color: _primary.withOpacity(0.22),
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 46,
+                            height: 46,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.18),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: Colors.white.withOpacity(0.25)),
+                            ),
+                            child: const Icon(Icons.admin_panel_settings_rounded, color: Colors.white),
+                          ),
+                          const SizedBox(width: 12),
+                          const Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "Xin chào Admin 👋",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16.5,
+                                    fontWeight: FontWeight.w900,
+                                  ),
+                                ),
+                                SizedBox(height: 6),
+                                Text(
+                                  "Theo dõi số liệu & quản lý dữ liệu nhanh chóng.",
+                                  style: TextStyle(color: Color(0xEEFFFFFF), height: 1.2),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // ===== Stats title row =====
+                    Row(
+                      children: [
+                        const Text(
+                          "Thống kê nhanh",
+                          style: TextStyle(fontSize: 15.5, fontWeight: FontWeight.w900),
+                        ),
+                        const Spacer(),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: _primary.withOpacity(0.08),
+                            borderRadius: BorderRadius.circular(999),
+                            border: Border.all(color: _primary.withOpacity(0.18)),
+                          ),
+                          child: const Row(
+                            children: [
+                              Icon(Icons.bolt_rounded, size: 16, color: _primary),
+                              SizedBox(width: 6),
+                              Text(
+                                "Realtime",
+                                style: TextStyle(color: _primary, fontWeight: FontWeight.w800),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
-                  ),
-                ],
-              ),
-            ),
+                    const SizedBox(height: 10),
 
-            const SizedBox(height: 16),
+                    // ===== Stats grid =====
+                    LayoutBuilder(
+                      builder: (context, c) {
+                        final crossAxisCount = isSmall ? 2 : 3;
 
-            // ===== Stats =====
-            const Text(
-              "Thống kê nhanh",
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(height: 10),
+                        // ✅ thêm 1 item => tổng 6 item (đẹp hơn)
+                        return GridView.count(
+                          crossAxisCount: crossAxisCount,
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          mainAxisSpacing: 12,
+                          crossAxisSpacing: 12,
+                          childAspectRatio: 1.42,
+                          children: [
+                            _ModernStatCard(
+                              title: "Dịch vụ",
+                              icon: Icons.content_cut_rounded,
+                              primary: _primary,
+                              stream: _watchCount("services"),
+                            ),
+                            _ModernStatCard(
+                              title: "Lịch hẹn",
+                              icon: Icons.event_available_rounded,
+                              primary: _primary,
+                              stream: _watchCount("bookings"),
+                            ),
+                            _ModernStatCard(
+                              title: "Chuyên viên",
+                              icon: Icons.people_alt_rounded,
+                              primary: _primary,
+                              stream: _watchCount("workers"),
+                            ),
+                            _ModernStatCard(
+                              title: "Người dùng",
+                              icon: Icons.person_rounded,
+                              primary: _primary,
+                              stream: _watchCount("users"),
+                            ),
+                            _ModernStatCard(
+                              title: "Hỗ trợ chat",
+                              icon: Icons.chat_bubble_outline_rounded,
+                              primary: _primary,
+                              stream: _watchCount("support_chats"),
+                            ),
 
-            LayoutBuilder(
-              builder: (context, c) {
-                final crossAxisCount = c.maxWidth < 420 ? 2 : 3;
-                return GridView.count(
-                  crossAxisCount: crossAxisCount,
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  mainAxisSpacing: 12,
-                  crossAxisSpacing: 12,
-                  childAspectRatio: 1.55,
-                  children: [
-                    _LiveStatCard(
-                      title: "Dịch vụ",
-                      icon: Icons.content_cut,
-                      primary: primary,
-                      stream: _watchCount("services"),
+                            // ✅ THỐNG KÊ ƯU ĐÃI (collection promotions)
+                            _ModernStatCard(
+                              title: "Ưu đãi",
+                              icon: Icons.local_offer_rounded,
+                              primary: _primary,
+                              stream: _watchCount("promotions"), // <-- đổi nếu collection khác
+                            ),
+                          ],
+                        );
+                      },
                     ),
-                    _LiveStatCard(
-                      title: "Lịch hẹn",
-                      icon: Icons.event_available,
-                      primary: primary,
-                      stream: _watchCount("bookings"),
+
+                    const SizedBox(height: 18),
+
+                    // ===== Actions =====
+                    const Text(
+                      "Chức năng quản trị",
+                      style: TextStyle(fontSize: 15.5, fontWeight: FontWeight.w900),
                     ),
-                    _LiveStatCard(
-                      title: "Chuyên viên",
-                      icon: Icons.people,
-                      primary: primary,
-                      stream: _watchCount("workers"),
+                    const SizedBox(height: 10),
+
+                    // Action grid (đẹp, hiện đại)
+                    LayoutBuilder(
+                      builder: (context, c) {
+                        final crossAxisCount = isSmall ? 2 : 3;
+                        return GridView.count(
+                          crossAxisCount: crossAxisCount,
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          mainAxisSpacing: 12,
+                          crossAxisSpacing: 12,
+                          childAspectRatio: 1.15,
+                          children: [
+                            _ActionCard(
+                              title: "Dịch vụ",
+                              subtitle: "Thêm / sửa / xóa",
+                              icon: Icons.content_cut_rounded,
+                              color: _primary,
+                              onTap: () => _go(context, const ManageServicesScreen()),
+                            ),
+                            _ActionCard(
+                              title: "Lịch hẹn",
+                              subtitle: "Duyệt / trạng thái",
+                              icon: Icons.event_note_rounded,
+                              color: _primary,
+                              onTap: () => _go(context, const ManageBookingsScreen()),
+                            ),
+                            _ActionCard(
+                              title: "Chuyên viên",
+                              subtitle: "Thêm / sửa / xóa",
+                              icon: Icons.people_alt_rounded,
+                              color: _primary,
+                              onTap: () => _go(context, const ManageWorkersScreen()),
+                            ),
+                            _ActionCard(
+                              title: "Người dùng",
+                              subtitle: "Role / hồ sơ",
+                              icon: Icons.manage_accounts_rounded,
+                              color: _primary,
+                              onTap: () => _go(context, const ManageUsersScreen()),
+                            ),
+                            _ActionCard(
+                              title: "Chat hỗ trợ",
+                              subtitle: "Trả lời khách",
+                              icon: Icons.chat_rounded,
+                              color: _primary,
+                              onTap: () => _go(context, const ManageChatsScreen()),
+                            ),
+                            _ActionCard(
+                              title: "Ưu đãi",
+                              subtitle: "Thông báo KM",
+                              icon: Icons.campaign_rounded,
+                              color: _primary,
+                              onTap: () => _go(context, const ManagePromotionsScreen()),
+                            ),
+                          ],
+                        );
+                      },
                     ),
-                    _LiveStatCard(
-                      title: "Người dùng",
-                      icon: Icons.person,
-                      primary: primary,
-                      stream: _watchCount("users"),
+
+                    const SizedBox(height: 14),
+
+                    // ===== Logout button =====
+                    SizedBox(
+                      height: 48,
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: () => widget.onLogout?.call(),
+                        icon: const Icon(Icons.logout_rounded),
+                        label: const Text(
+                          "Đăng xuất",
+                          style: TextStyle(fontWeight: FontWeight.w800),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: _primary,
+                          side: BorderSide(color: _primary.withOpacity(0.35)),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        ),
+                      ),
                     ),
-                    _LiveStatCard(
-                      title: "Hỗ trợ chat",
-                      icon: Icons.chat_bubble_outline,
-                      primary: primary,
-                      stream: _watchCount("support_chats"),
-                    ),
+
+                    const SizedBox(height: 10),
                   ],
-                );
-              },
-            ),
-
-            const SizedBox(height: 18),
-
-            // ===== Quick Actions =====
-            Row(
-              children: const [
-                Text(
-                  "Chức năng quản trị",
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
                 ),
-              ],
-            ),
-            const SizedBox(height: 10),
-
-            _ActionTile(
-              title: "Quản lý dịch vụ",
-              subtitle: "Thêm / sửa / xóa dịch vụ",
-              icon: Icons.content_cut,
-              color: primary,
-              onTap: () => _go(context, const ManageServicesScreen()),
-            ),
-            const SizedBox(height: 10),
-
-            _ActionTile(
-              title: "Quản lý lịch hẹn",
-              subtitle: "Xem tất cả booking, đổi trạng thái, xóa",
-              icon: Icons.event_note,
-              color: primary,
-              onTap: () => _go(context, const ManageBookingsScreen()),
-            ),
-            const SizedBox(height: 10),
-
-            _ActionTile(
-              title: "Quản lý chuyên viên",
-              subtitle: "Thêm / sửa / xóa chuyên viên",
-              icon: Icons.people_alt,
-              color: primary,
-              onTap: () => _go(context, const ManageWorkersScreen()),
-            ),
-            const SizedBox(height: 10),
-
-            _ActionTile(
-              title: "Quản lý người dùng",
-              subtitle: "Xem user, đổi role, kiểm tra hồ sơ",
-              icon: Icons.manage_accounts,
-              color: primary,
-              onTap: () => _go(context, const ManageUsersScreen()),
-            ),
-            const SizedBox(height: 10),
-
-            _ActionTile(
-              title: "Quản lý chat hỗ trợ",
-              subtitle: "Xem phòng chat, trả lời khách",
-              icon: Icons.chat,
-              color: primary,
-              onTap: () => _go(context, const ManageChatsScreen()),
-            ),
-            const SizedBox(height: 10),
-
-            _ActionTile(
-              title: "Quản lý ưu đãi",
-              subtitle: "Tạo thông báo khuyến mãi cho khách",
-              icon: Icons.campaign,
-              color: primary,
-              onTap: () => _go(context, const ManagePromotionsScreen()),
-            ),
-            const SizedBox(height: 10),
-
-            const SizedBox(height: 12),
-
-            // ===== Logout button =====
-            SizedBox(
-              height: 46,
-              child: OutlinedButton.icon(
-                onPressed: () => widget.onLogout?.call(),
-                icon: const Icon(Icons.logout),
-                label: const Text("Đăng xuất"),
               ),
             ),
           ],
@@ -246,15 +319,14 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
   }
 }
 
-/// Card thống kê realtime, không bị loading xoay liên tục.
-/// Có skeleton nhẹ lúc chưa có dữ liệu.
-class _LiveStatCard extends StatelessWidget {
+/// ===== Modern Stat Card =====
+class _ModernStatCard extends StatelessWidget {
   final String title;
   final IconData icon;
   final Color primary;
   final Stream<int> stream;
 
-  const _LiveStatCard({
+  const _ModernStatCard({
     required this.title,
     required this.icon,
     required this.primary,
@@ -267,23 +339,28 @@ class _LiveStatCard extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18),
         boxShadow: const [
           BoxShadow(
             color: Color(0x12000000),
-            blurRadius: 12,
-            offset: Offset(0, 6),
+            blurRadius: 14,
+            offset: Offset(0, 8),
           ),
         ],
       ),
       child: Row(
         children: [
           Container(
-            width: 38,
-            height: 38,
+            width: 40,
+            height: 40,
             decoration: BoxDecoration(
-              color: primary.withOpacity(0.12),
-              borderRadius: BorderRadius.circular(12),
+              gradient: LinearGradient(
+                colors: [primary.withOpacity(0.18), primary.withOpacity(0.06)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: primary.withOpacity(0.14)),
             ),
             child: Icon(icon, color: primary),
           ),
@@ -292,8 +369,7 @@ class _LiveStatCard extends StatelessWidget {
             child: StreamBuilder<int>(
               stream: stream,
               builder: (context, snap) {
-                final value = snap.data;
-                // Nếu chưa có data -> show placeholder chứ không xoay
+                final v = snap.data;
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -301,27 +377,27 @@ class _LiveStatCard extends StatelessWidget {
                     Text(
                       title,
                       style: const TextStyle(
-                        fontSize: 12.5,
+                        fontSize: 12.8,
                         color: Colors.black54,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                     const SizedBox(height: 6),
-                    if (value == null)
+                    if (v == null)
                       Container(
                         height: 18,
                         width: 56,
                         decoration: BoxDecoration(
                           color: const Color(0x11000000),
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(10),
                         ),
                       )
                     else
                       Text(
-                        value.toString(),
+                        v.toString(),
                         style: const TextStyle(
                           fontSize: 20,
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.w900,
                         ),
                       ),
                   ],
@@ -335,14 +411,15 @@ class _LiveStatCard extends StatelessWidget {
   }
 }
 
-class _ActionTile extends StatelessWidget {
+/// ===== Action Card (Dashboard style) =====
+class _ActionCard extends StatelessWidget {
   final String title;
   final String subtitle;
   final IconData icon;
   final Color color;
   final VoidCallback onTap;
 
-  const _ActionTile({
+  const _ActionCard({
     required this.title,
     required this.subtitle,
     required this.icon,
@@ -354,41 +431,47 @@ class _ActionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: Colors.white,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(18),
       child: InkWell(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18),
         onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          child: Row(
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: const Color(0x11000000)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                width: 42,
-                height: 42,
+                width: 44,
+                height: 44,
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(14),
+                  color: color.withOpacity(0.10),
+                  borderRadius: BorderRadius.circular(16),
                 ),
                 child: Icon(icon, color: color),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: const TextStyle(fontWeight: FontWeight.w800),
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      subtitle,
-                      style: const TextStyle(color: Colors.black54),
-                    ),
-                  ],
-                ),
+              const Spacer(),
+              Text(
+                title,
+                style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 14.8),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-              const Icon(Icons.chevron_right, color: Colors.black38),
+              const SizedBox(height: 4),
+              Text(
+                subtitle,
+                style: const TextStyle(color: Colors.black54, height: 1.15),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 6),
+              const Align(
+                alignment: Alignment.centerRight,
+                child: Icon(Icons.chevron_right_rounded, color: Colors.black38),
+              ),
             ],
           ),
         ),

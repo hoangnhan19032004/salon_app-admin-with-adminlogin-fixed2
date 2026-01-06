@@ -8,7 +8,8 @@ import 'package:salon_app/screens/promotions/promotions_screen.dart';
 import 'package:salon_app/provider/user_provider.dart';
 import 'package:salon_app/widgets/horizontal_line.dart';
 import 'package:salon_app/screens/profile/edit_profile_screen.dart'; // ✅ tạo file này
-import 'package:salon_app/screens/booking/booking_screen.dart';
+import 'package:salon_app/screens/booking/my_bookings_screen.dart';
+
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -214,7 +215,7 @@ class ProfileScreen extends StatelessWidget {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const BookingScreen()),
+                    MaterialPageRoute(builder: (_) => const MyBookingsScreen()),
                   );
                 },
               ),
@@ -237,7 +238,7 @@ class ProfileScreen extends StatelessWidget {
                     MaterialPageRoute(
                       builder: (_) => const _SimplePlaceholderPage(
                         title: "Phương thức thanh toán",
-                        subtitle: "Chức năng này sẽ được cập nhật trong phiên bản tiếp theo.",
+                        subtitle: "Chức năng này sẽ được cập nhật, nâng cấp trong tương lai.",
                       ),
                     ),
                   );

@@ -45,7 +45,8 @@ class _ManageBookingsScreenState extends State<ManageBookingsScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text("Xóa lịch hẹn"),
-        content: Text("Xóa lịch hẹn: ${name.isEmpty ? '(không rõ dịch vụ)' : name} ?"),
+        content:
+        Text("Xóa lịch hẹn: ${name.isEmpty ? '(không rõ dịch vụ)' : name} ?"),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
@@ -106,7 +107,7 @@ class _ManageBookingsScreenState extends State<ManageBookingsScreen> {
               controller: _searchCtl,
               decoration: InputDecoration(
                 prefixIcon: const Icon(Icons.search),
-                labelText: "Tìm theo dịch vụ / tên user / SĐT",
+                labelText: "Tìm theo dịch vụ / user / SĐT / chuyên viên",
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
                 ),
@@ -128,12 +129,24 @@ class _ManageBookingsScreenState extends State<ManageBookingsScreen> {
                 }
 
                 final q = _searchCtl.text.trim().toLowerCase();
+
                 final docs = snapshot.data!.docs.where((d) {
                   final data = d.data();
-                  final service = (data['serviceName'] ?? '').toString().toLowerCase();
-                  final user = (data['userName'] ?? data['userEmail'] ?? '').toString().toLowerCase();
+                  final service =
+                  (data['serviceName'] ?? '').toString().toLowerCase();
+                  final user = (data['userName'] ?? data['userEmail'] ?? '')
+                      .toString()
+                      .toLowerCase();
                   final phone = (data['phone'] ?? '').toString().toLowerCase();
-                  return q.isEmpty || service.contains(q) || user.contains(q) || phone.contains(q);
+                  final worker = (data['workerName'] ?? data['workerId'] ?? '')
+                      .toString()
+                      .toLowerCase();
+
+                  return q.isEmpty ||
+                      service.contains(q) ||
+                      user.contains(q) ||
+                      phone.contains(q) ||
+                      worker.contains(q);
                 }).toList();
 
                 docs.sort((a, b) {
@@ -157,8 +170,16 @@ class _ManageBookingsScreenState extends State<ManageBookingsScreen> {
                     final service = (data['serviceName'] ?? '').toString();
                     final date = (data['date'] ?? '').toString();
                     final time = (data['time'] ?? '').toString();
-                    final user = (data['userName'] ?? data['userEmail'] ?? '').toString();
+                    final user =
+                    (data['userName'] ?? data['userEmail'] ?? '').toString();
                     final phone = (data['phone'] ?? '').toString();
+
+                    // ✅ workerName / workerId
+                    final workerName = (data['workerName'] ?? '').toString().trim();
+                    final workerId = (data['workerId'] ?? '').toString().trim();
+                    final workerText = workerName.isNotEmpty
+                        ? workerName
+                        : (workerId.isNotEmpty ? "(ID: $workerId)" : "(không rõ)");
 
                     String status = (data['status'] ?? 'pending').toString();
                     if (!_statusKeys.contains(status)) status = "pending";
@@ -183,7 +204,8 @@ class _ManageBookingsScreenState extends State<ManageBookingsScreen> {
                                 CircleAvatar(
                                   radius: 18,
                                   backgroundColor: primary.withOpacity(0.12),
-                                  child: const Icon(Icons.event_available, color: primary),
+                                  child:
+                                  const Icon(Icons.event_available, color: primary),
                                 ),
                                 const SizedBox(width: 10),
                                 Expanded(
@@ -198,23 +220,27 @@ class _ManageBookingsScreenState extends State<ManageBookingsScreen> {
                                   ),
                                 ),
                                 Chip(
-                                  avatar: Icon(_statusIcon(status), size: 16, color: c),
+                                  avatar: Icon(_statusIcon(status),
+                                      size: 16, color: c),
                                   label: Text(
                                     _statusLabel[status] ?? status,
-                                    style: TextStyle(color: c, fontWeight: FontWeight.w600),
+                                    style: TextStyle(
+                                        color: c, fontWeight: FontWeight.w600),
                                   ),
                                   backgroundColor: c.withOpacity(0.10),
                                   side: BorderSide(color: c.withOpacity(0.25)),
-                                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                                  padding:
+                                  const EdgeInsets.symmetric(horizontal: 6),
                                 ),
                               ],
                             ),
                             const SizedBox(height: 10),
 
-                            // Info lines
+                            // User
                             Row(
                               children: [
-                                const Icon(Icons.person_outline, size: 18, color: Colors.black54),
+                                const Icon(Icons.person_outline,
+                                    size: 18, color: Colors.black54),
                                 const SizedBox(width: 6),
                                 Expanded(
                                   child: Text(
@@ -225,10 +251,32 @@ class _ManageBookingsScreenState extends State<ManageBookingsScreen> {
                                 ),
                               ],
                             ),
+
                             const SizedBox(height: 6),
+
+                            // ✅ Worker
                             Row(
                               children: [
-                                const Icon(Icons.schedule, size: 18, color: Colors.black54),
+                                const Icon(Icons.badge_outlined,
+                                    size: 18, color: Colors.black54),
+                                const SizedBox(width: 6),
+                                Expanded(
+                                  child: Text(
+                                    "Chuyên viên: $workerText",
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            const SizedBox(height: 6),
+
+                            // Date time
+                            Row(
+                              children: [
+                                const Icon(Icons.schedule,
+                                    size: 18, color: Colors.black54),
                                 const SizedBox(width: 6),
                                 Expanded(
                                   child: Text(
@@ -239,10 +287,14 @@ class _ManageBookingsScreenState extends State<ManageBookingsScreen> {
                                 ),
                               ],
                             ),
+
                             const SizedBox(height: 6),
+
+                            // Phone
                             Row(
                               children: [
-                                const Icon(Icons.phone_outlined, size: 18, color: Colors.black54),
+                                const Icon(Icons.phone_outlined,
+                                    size: 18, color: Colors.black54),
                                 const SizedBox(width: 6),
                                 Expanded(
                                   child: Text(
@@ -263,9 +315,11 @@ class _ManageBookingsScreenState extends State<ManageBookingsScreen> {
                               children: [
                                 Expanded(
                                   child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                                    padding:
+                                    const EdgeInsets.symmetric(horizontal: 12),
                                     decoration: BoxDecoration(
-                                      border: Border.all(color: const Color(0x22000000)),
+                                      border: Border.all(
+                                          color: const Color(0x22000000)),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: DropdownButtonHideUnderline(

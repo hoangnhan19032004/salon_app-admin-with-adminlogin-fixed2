@@ -14,7 +14,7 @@ class Carousel extends StatelessWidget {
           subtitle: "8AM - 10PM",
           buttonText: "Giảm đến 20%",
           imageUrl:
-          "https://images.squarespace-cdn.com/content/v1/5e867df9747b0e555c337eef/1589945925617-4NY8TG8F76FH1O0P46FW/Kampaamo-helsinki-hair-design-balayage-hiustenpidennys-varjays.png",
+          "https://sf-static.upanhlaylink.com/img/image_2026010693076e37a7313ddcd7d1f61ecb22c635.jpg",
           onTap: null,
         ),
 
@@ -24,7 +24,7 @@ class Carousel extends StatelessWidget {
           subtitle: "Ngay bây giờ",
           buttonText: "Đặt lịch tại đây",
           imageUrl:
-          "https://img.grouponcdn.com/bynder/2sLSquS1xGWk4QjzYuL7h461CDsJ/2s-2048x1229/v1/sc600x600.jpg",
+          "https://sf-static.upanhlaylink.com/img/image_20260106b2eb8e8f45ed40fdc65fe6d234d93e55.jpg",
           onTap: onGoBooking,
         ),
       ],
