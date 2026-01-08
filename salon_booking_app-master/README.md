@@ -1,104 +1,109 @@
-
-# Salon Booking App
-
-
+Salon Booking App
 
 https://github.com/himanshugoyal77/salon_booking_app/assets/92782099/e3d2dadc-9938-47cf-b9c6-f81f427a71c7
+ 
+GitHub
 
+Ứng dụng Flutter đặt lịch salon với giao diện sạch, hiện đại. Hỗ trợ các chức năng như Google Maps, hệ thống đặt lịch (reservation/booking), và xác thực Firebase.
 
+API Reference
+Lấy Google Maps API Key
 
-Flutter app with clean user interface and morden functionallities like goole maps, reservation system, authentication with firebase
+Tạo/Chọn project trên Google Cloud Console
 
+Bật Maps SDK for Android và Maps SDK for iOS
 
-## API Reference
+Tạo API Key và (khuyến nghị) giới hạn key theo Android/iOS + package/bundle id
 
-#### Get google maps api
+Tài liệu tham khảo: Google Maps Platform docs. 
+GitHub
 
+Gợi ý cấu hình nhanh (phổ biến trong Flutter):
 
-## Authors
+Android: thêm API key vào android/app/src/main/AndroidManifest.xml (meta-data com.google.android.geo.API_KEY)
 
-- [@HimanshuGoyal](https://www.linkedin.com/in/himanshu-goyal048/)
+iOS: cấu hình key trong ios/Runner (Info.plist hoặc AppDelegate tuỳ cách bạn tích hợp)
 
-## Color Reference
+Tác giả
 
-| Color             | Hex                                                                |
-| ----------------- | ------------------------------------------------------------------ |
-| purple | ![0xff721c80](https://via.placeholder.com/10/0a192f?text=+) Color(0xff721c80) |
-| white | ![#f8f8f8](https://via.placeholder.com/10/f8f8f8?text=+) Color(#FFFFFF) |
-| pink shade | ![#f8f8f8](https://via.placeholder.com/10/f8f8f8?text=+) Color.fromARGB(255, 196, 103, 169) |
+@HimanshuGoyal
+ 
+GitHub
 
+Bảng màu (Color Reference)
+Màu	Giá trị
+Tím (purple)	Color(0xff721c80)
+Trắng (white)	Color(#FFFFFF)
+Hồng nhạt (pink shade)	Color.fromARGB(255, 196, 103, 169)
 
-## Demo
+GitHub
+
+Demo
 
 https://www.linkedin.com/feed/update/urn:li:activity:7013721931489144832?utm_source=share&utm_medium=member_desktop
+ 
+GitHub
 
-    
-## Features
+Tính năng (Features)
 
-- goole maps
-- live locations
-- google authentiactin
-- Cross platform
+Google Maps
 
+Theo dõi vị trí trực tiếp (Live location)
 
-## Feedback
+Đăng nhập / xác thực bằng Google & Firebase
 
-If you have any feedback, please reach out to us at https://www.linkedin.com/in/himanshu-goyal048/
+Đặt lịch hẹn (Booking/Reservation)
 
+Chạy đa nền tảng (Android/iOS)
 
-## Run Locally
+GitHub
 
-Clone the project
+Góp ý (Feedback)
 
-```bash
-  git clone https://link-to-project
-```
+Nếu bạn có góp ý, vui lòng liên hệ:
+https://www.linkedin.com/in/himanshu-goyal048/
+ 
+GitHub
 
-Go to the project directory
+Chạy dự án ở máy local (Run Locally)
 
-```bash
-  cd my-project
-```
+Clone dự án:
 
-Install dependencies
-
-```bash
-  flutter pub get
-```
-
-Start the app
-
-```bash
-  fluttrer run
-```
+git clone https://github.com/himanshugoyal77/salon_booking_app.git
 
 
-## Screenshots
+Vào thư mục dự án:
 
-![App Screenshot](https://firebasestorage.googleapis.com/v0/b/reddit-clone-e4353.appspot.com/o/photo_2022-12-28_13-01-31.jpg?alt=media&token=847a0b2f-a894-4b0a-a086-9144346d63e9)
-
-![App Screenshot](https://firebasestorage.googleapis.com/v0/b/reddit-clone-e4353.appspot.com/o/photo_2022-12-28_13-01-35.jpg?alt=media&token=8908fb44-cb64-4a0b-b95e-892052c03c00)
+cd salon_booking_app
 
 
-![App Screenshot](https://firebasestorage.googleapis.com/v0/b/reddit-clone-e4353.appspot.com/o/photo_2022-12-28_13-01-33.jpg?alt=media&token=6d686965-93b3-4f7f-a136-bc5ff9437120)
-## Tech Stack
+Cài dependencies:
 
-**Client:** flutter, dart
-
-**Server:** firebase
+flutter pub get
 
 
-## 🚀 About Me
-I'm a full stack flutter developer...
+Chạy app:
+
+flutter run
+
+Screenshots
+
+Công nghệ sử dụng (Tech Stack)
+
+Client: Flutter, Dart
+Backend/Server: Firebase 
+GitHub
+
+🚀 Về tôi (About Me)
+
+Mình là một Flutter developer full-stack...
+
+🛠 Kỹ năng (Skills)
+
+JavaScript, HTML, CSS, Flutter, Firebase, Node.js, React.js, Tailwind CSS
+
+🔗 Liên kết (Links)
 
 
-## 🛠 Skills
-Javascript, HTML, CSS, Flutter, 
-Firebase, Node.js, React.js, Tailwind css
 
-
-## 🔗 Links
-[![portfolio](https://img.shields.io/badge/my_portfolio-000?style=for-the-badge&logo=ko-fi&logoColor=white)](https://katherineoelsner.com/)
-[![linkedin](https://img.shields.io/badge/linkedin-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/)
-[![twitter](https://img.shields.io/badge/twitter-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white)](https://twitter.com/)
 
